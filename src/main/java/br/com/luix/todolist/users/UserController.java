@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import at.favre.lib.crypto.bcrypt.BCrypt;
+
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -24,9 +26,13 @@ public class UserController {
             System.out.println("User exists, please change your UserName!");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
+
+        var passwordHash = BCrypt.withDefaults().hashToString(12, userData.getPassword().toCharArray());
+        userData.setPassword(passwordHash);
         var userCreated = this.userRepositoy.save(userData);
         return ResponseEntity.status(HttpStatus.CREATED).body(userCreated);
     }
+    
     @GetMapping("/testando")
     public void getName(){
         System.out.println("PORRA");
