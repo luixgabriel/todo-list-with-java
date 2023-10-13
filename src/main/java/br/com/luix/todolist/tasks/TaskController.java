@@ -32,15 +32,16 @@ public class TaskController {
 
     @PostMapping()
     public ResponseEntity create(@RequestBody TaskModel taskData, HttpServletRequest request){
+        System.out.println("meu body" + taskData);
         var requestId = request.getAttribute("userId");
         taskData.setIdUser((UUID) requestId);
         var currentDate = LocalDateTime.now();
-        if(currentDate.isAfter(taskData.getStart_At()) || currentDate.isAfter(taskData.getEnd_At())){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Date Error");
-        }
-        if(taskData.getStart_At().isAfter(taskData.getEnd_At())){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Date Error");
-        }
+        // if(currentDate.isAfter(taskData.getStart_At()) || currentDate.isAfter(taskData.getEnd_At())){
+        //     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Date Error");
+        // }
+        // if(taskData.getStart_At().isAfter(taskData.getEnd_At())){
+        //     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Date Error");
+        // }
         var task = this.taskRepository.save(taskData);
             return ResponseEntity.status(HttpStatus.CREATED).body(task);
     }
@@ -54,7 +55,16 @@ public class TaskController {
 
     @PutMapping("/{id}")
     public ResponseEntity update(@RequestBody TaskModel taskData ,HttpServletRequest request, @PathVariable UUID id){
+        var requestId = request.getAttribute("userId");
         var taskExists = this.taskRepository.findById(id).orElse(null);
+
+         if(taskExists == null){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("task not found!");
+        }
+
+        if(!taskExists.getIdUser().equals(requestId)){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("user no have authorization for update this task!");
+        }
         Utils.copyNonNullProperties(taskData, taskExists);
         var task = this.taskRepository.save(taskData);
         return ResponseEntity.status(HttpStatus.OK).body(task);

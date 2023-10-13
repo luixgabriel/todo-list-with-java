@@ -21,7 +21,7 @@ public class UserController {
     @PostMapping("/")
     public ResponseEntity create(@RequestBody UserModel userData){
         var user = this.userRepositoy.findByUsername(userData.getUsername());
-
+       
         if(user != null){
             System.out.println("User exists, please change your UserName!");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
